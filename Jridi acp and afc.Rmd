@@ -1,0 +1,271 @@
+---
+title: "ACP et AFC"
+author: "Jridi Mohamed Abderrahim"
+date: "16/06/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Etude descriptive
+A l'aide de google docs, un questionnaire a été fait sur l'utilisation d'Internet sur un échantillon de 43 individus.
+Afin de récuperer les reponses, on telecharge à partir du google docs la base sous format excel.
+les 3 premiers variables du questionnaires sont respectivement à propos:sexe, age, formation. C'est pour étudier l'état sociale des individus de notre échantillon.
+on effectue l'échelle de likert de cette questionnaire pour les questions sur laquelle on va etudier l'acp pour que R puisse le comprendre proprement comme suit: 
+pas du tout d'accord = '1'
+
+pas d'accord = '2'
+
+ni en d?saccord ni d'accord ='3'
+
+d'accord ='4'
+
+tout a fait d'accord='5'
+
+
+```{r cars}
+library(readxl)
+TAB1 <- read_excel("C:/Users/WIKI/Desktop/school/acp/acp.xlsx",skip = 0)
+summary(TAB1)
+
+
+
+```
+
+A l'issue de ce questionnaire on a 37.2% des individus qui sont des femmes et 62.8% des individus qui sont des hommes.
+Parmis ces individus, on trouve que 2.3% ont entre 15 et 20 d'age, 95.3% ont entre 20 et 25 d'age et 2.3 % ont plus que 30 d'age
+On peut répartir ces individus encore entre deux groupes suivant leurs niveaux de formation.74.7% sont des étudiants et 25.6% ont terminé leurs niveaux de formation. 
+## Including Plots
+```{r}
+library(ggplot2)
+age=TAB1$age
+formation=TAB1$formation
+sexe=TAB1$sexe
+g <-ggplot(TAB1,aes(age))+
+  geom_bar(aes(fill=age))
+g
+f <-ggplot(TAB1,aes(formation))+
+  geom_bar(aes(fill=formation))
+f
+TAB1[[1]]<-as.factor(TAB1[[1]])
+x<-summary(TAB1$sexe)
+names(x)<-c("Femme 37.2%","Homme 62.8%")
+pie(x,main = "Distribution de l'?chantillon selon sexe")
+```
+
+#ACP
+
+```{r pressure, echo=FALSE}
+library(FactoMineR)
+library(factoextra)
+library(ggplot2)
+```
+
+L’analyse en composantes principales ou ACP est une méthode d’analyse exploratoire des données. Elle s’applique le plus souvent sur des jeux de données moyennées comportant n individus et p variables. Dans notre cas n=43 et p = 13.
+L’ACP nous aide à la description du jeu de données et l'identification de groupes d’individus et liens entre variables 
+  L’ACP sert à décrire un jeu de données comportant de nombreux individus et variables quantitatives. L’analyse permet d’extraire l’information pertinente et la synthétise sous forme de composantes principales, nouveaux axes pour décrire le jeu de données.
+Notre premiére objectif de faire ce questionnaire est d'étudier la corrélation entre les activités principales sur internet et de voir sur quel activité on consacre plus de temps sur internet. 
+Pour cela, on applique l'ACP pour la question suivant:Lorsque vous êtes sur Internet, quelles sont vos activités principales ? (degrés d'importance croissant de 1 à 5)
+cette question admet 13 affirmation
+1. Effectuer des recherches diverses ~~ recherches diverses
+2. Effectuer des payements via PC-Banking ~~ payments
+3. Faire des achats/ventes en ligne ~~ achats/ventes
+4. Télécharger des logiciels ~~ télécharger logiciels
+5. Consulter des produits avant de les acheter en magasin ~~ consulter des produits avant acheter
+6. Suivre des cours en ligne ~~ cours en ligne
+7. Lire la presse quotidienne en ligne ~~ suivre les NEWS
+8. E-mail ~~ Email
+9. Réseaux sociaux ~~ Réseaux sociaux
+10. Télécharger des films ~~ films
+11. Ecouter de la musique ~~ Musique
+12. Télécharger des jeux ~~ télécharger des jeux
+13. Publier sur internet (sur Facebook  ,Linkedin,...) ~~ publier sur internet
+on introduit dans notre ACP une variable quantitative supplémentaire répondant à la question:
+-)Quel est votre degré de satisfaction quant aux résultats de vos recherches effectuées par Internet ? (1:Très insatisfait , 2:Insatisfait ,3:Neutre ,4:Satisfait ,5:Très satisfait ) ~~ satisfaction
+on introduit encore deux variables qualitatives:le sexe et la formation 
+```{r pressure, echo=FALSE}
+res.pca<-PCA(TAB1[,c(1,2,9,10,11,12,13,14,15,16,17,18,19,20,21)],quali.sup = 1:2,graph=T)
+res.pca
+res.pca$eig
+```
+
+#nbre d'axe à choisir
+on choisit maintenant le nombre d'axe à retenir.Pour cela on prend en concideration 3 critéres: critére de coude, critére de kaiser, et le taux d'inertie cumulé
+
+suivant le critére de kaiser: on garde les 3 premiéres axes dont les valeurs propres sont respectivement 5.07016525 2.68263654 1.21395652
+
+suivant le critére de coude: on remarque que le coude se trouve au niveau du deuxiéme axe, donc on va garder les deux premiéres axes 
+
+suivant le taux d 'inertie cumulé: on remarque que le taux d'inertie cumulé des 2 premiers axes est de 59.64 qui est un taux important compte tenu du fait que nous avons 13 variables.
+on va donc, d’après ce critère, retenir les 2 premiers axes
+
+par un petit vode de ces 3 critéres, on va retenir seulement les 2 premiers axes
+
+```{r pressure, echo=FALSE}
+fviz_screeplot(res.pca,ncp=15)
+```
+
+## 3. Interprétation de la carte des variables
+```{r pressure, echo=FALSE}
+names (res.pca$var)
+```
+
+
+```{r pressure, echo=FALSE}
+res.pca$var$coord
+```
+
+
+```{r pressure, echo=FALSE}
+res.pca$var$cos2
+```
+ ##Interprétation de cette première carte des variables (i.e. axes 1 et 2) :
+ on peut diviser les variables sous 4 sous groupes
+#1er groupe: 
+Les variables "payments", "suivre les NEWS", "achats/ventes" et "consulter des produits avant acheter" sont fortement corrélés entre eux. Donc si quelqu'un effectue ses payements via internet avec son compte bancaire consulte aux produits et effectue des achats ou des ventes sur internet. Ce même individu suit tous ce qui est nouveauté et lit d'une maniére régulier la presse en ligne. 
+#2eme groupe: 
+les variables "cours en ligne" , "télécharger des logiciels", "film" et "télécharger jeux" sont fortement corrélés entre eux. donc ceux qui utilisent l'internet pour suivre des cours en ligne et pour télécharger des logiciels, regardent des films et téléchargent des Jeux.
+Donc celui qui utilise l'internet pour enrichir sa formation et son carriére, l'utilise bien évidemment pour se reposer et pour le plaisir.
+#3eme groupe: 
+les variables "Email" , "recherches diverses" et "musique" sont fortement corrélés entre eux.
+Alors les personnes qui consacrent beaucoup de temps sur les recherches utilisent l'Email et écoutent beaucoup de la musique.
+#4eme groupe: 
+les variables "publier sur internet" et "reseaux sociaux" sont fortement corrélés entre eux.
+donc ceux qui utilisent les réseaux sociaux, ont plus de chance pour publier ce qu'ils veulent publier.
+On peut remarquer que le 1er groupe est négativement corrélée avec le 4eme groupe
+Alors ceux qui ont des comptes sur les réseaux sociaux oû ils consacrent le plus part de temps, ne sont pas ineteresse pour les achats en ligne ou pour suivre les nouveautés par les presses éléctroniques
+ 
+
+```{r}
+fviz_pca_var(res.pca)
+fviz_pca_var(res.pca, col.var="cos2") +
+  scale_color_gradient2(low="green", mid="blue", 
+                        high="red", midpoint=0.5) + 
+  theme_minimal()
+```
+
+
+```{r}
+fviz_pca_ind(res.pca,geom = "point",col.ind.sup = 'gray')
+fviz_pca_ind(res.pca,geom = "text",col.ind.sup = 'gray')
+```
+
+
+```{r}
+fviz_pca_ind(res.pca,geom = "text",col.ind="cos2")+
+scale_color_gradient2(low="blue", mid="white", 
+                      high="red", midpoint=0.5)
+```
+
+
+```{r}
+plot.PCA(res.pca, axes=c(1, 2), choix="ind", habillage=11, cex=0.7)
+```
+ seulement les individus plus que 30 d'age n'utilisent pas des reseaux sociaux.
+
+#AFC
+on va étudier l'AFC pour les variables age et la fréquence à laquelle les individus font leurs achats en ligne
+```{r}
+data<- table(TAB1$age,TAB1$frequence)
+data
+addmargins(data)
+```
+
+
+
+
+Le tableaux des fréquences est donné par :
+
+```{r}
+prop.table(data)
+addmargins(prop.table(data))
+```
+
+
+Tableaux des profils-lignes et profils-colonnes
+
+```{r}
+library(questionr)
+lprop(data)
+cprop(data)
+```
+Test du chi-2
+
+```{r}
+test<-chisq.test(data)
+test
+```
+La valeur du $\chi^2$ est de 3.3659
+Le degré de liberté du $\chi^2$ est de $(p-1)*(q-1) =(6-1)*(4-1) =4$
+
+```{r}
+res.ca<-CA(data,graph=F)
+summary(res.ca)
+```
+
+
+```{r}
+eig.val <- res.ca$eig
+round(res.ca$eig,3)
+```
+
+
+```{r}
+barplot(eig.val[, 2], 
+        names.arg = 1:nrow(eig.val), 
+        main = "Variances Explained by Dimensions (%)",
+        xlab = "Principal Dimensions",
+        ylab = "Percentage of variances",
+        col ="steelblue")
+# Add connected line segments to the plot
+lines(x = 1:nrow(eig.val), eig.val[, 2], 
+      type = "b", pch = 19, col = "red")
+```
+
+
+```{r}
+round(cbind(res.ca$col$coord[,1:2],res.ca$col$contrib[,1:2], res.ca$col$cos2[,1:2]),2)
+plot(res.ca, invisible="row")
+
+
+# Carte qui permet de contrôler automatiquement la couleur selon la contribution
+
+fviz_ca_col(res.ca, col.col = "contrib")+
+ scale_color_gradient2(low = "white", mid = "blue",
+           high = "red", midpoint = 25) +
+ theme_minimal()
+
+
+# Carte qui permet de contrôler automatiquement la couleur selon le cos2
+
+fviz_ca_col(res.ca, col.col="cos2")
+
+```
+
+
+```{r}
+round(cbind(res.ca$row$coord[,1:2],res.ca$row$contrib[,1:2], res.ca$row$cos2[,1:2]),2)
+plot(res.ca, invisible="col")
+
+
+# Carte qui permet de contrôler automatiquement la couleur selon la contribution
+
+fviz_ca_row(res.ca, col.row = "contrib")+
+ scale_color_gradient2(low = "white", mid = "blue",
+           high = "red", midpoint = 25) +
+ theme_minimal()
+
+
+# Carte qui permet de contrôler automatiquement la couleur selon le cos2
+
+fviz_ca_row(res.ca, col.row = "cos2")
+```
+
+```{r}
+# Biplot symétrique des lignes et des colonnes
+fviz_ca_biplot(res.ca)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
